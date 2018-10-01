@@ -527,4 +527,5 @@ class Emulator:
 
 
 
-emulator = Emulator(size=8, rom_path="MAZE")
+
+emulator = Emulator(size=8, rom_path="INVADERS")
