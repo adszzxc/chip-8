@@ -217,7 +217,7 @@ class Emulator:
         print("Adds the value kk to the value of register Vx, then stores the result in Vx.")
         kk = (self.opcode & 0x00ff)
         x = ((self.opcode & 0x0f00) >> 8)
-        self.gpio[x] = self.gpio[x] + kk
+        self.gpio[x] = (self.gpio[x] + kk) & 0xff
 
     def _8xy0(self):
         print("Stores the value of register Vy in register Vx.")
@@ -262,7 +262,7 @@ class Emulator:
             self.gpio[0xf] = 1
         else:
             self.gpio[0xf] = 0
-        self.gpio[x] = self.gpio[x] - self.gpio[y]
+        self.gpio[x] = (self.gpio[x] - self.gpio[y]) & 0xff
 
     def _8xy6(self):
         print("If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.")
@@ -273,7 +273,7 @@ class Emulator:
         else:
             self.gpio[0xf] = 0
         # should've made a more elegant bitwise shift right >>
-        self.gpio[x] = int(self.gpio[x] / 2)
+        self.gpio[x] = int(self.gpio[x] >> 1) & 0xff
 
     def _8xy7(self):
         print("If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.")
@@ -283,7 +283,7 @@ class Emulator:
             self.gpio[0xf] = 1
         else:
             self.gpio[0xf] = 0
-        self.gpio[x] = self.gpio[y] - self.gpio[x]
+        self.gpio[x] = (self.gpio[y] - self.gpio[x]) & 0xff
 
     def _8xyE(self):
         print("If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.")
@@ -294,7 +294,7 @@ class Emulator:
         else:
             self.gpio[0xf] = 0
         # should've made a more elegant bitwise shift left <<
-        self.gpio[x] = (self.gpio[x] * 2)
+        self.gpio[x] = (self.gpio[x] << 1) & 0xff
 
     def _9xy0(self):
         print("Skip next instruction if Vx != Vy.")
@@ -455,9 +455,9 @@ class Emulator:
     def _Fx33(self):
         # originally I made a crude attempt, this solution I found online in another emulator on GitHub, but works just like mine
         print ("Store BCD representation of Vx in memory locations I, I+1, I+2")
-        self.memory[self.index] = self.gpio[(self.opcode & 0x0f00) >> 8] / 100
-        self.memory[self.index+1] = (self.gpio[(self.opcode & 0x0f00) >> 8] % 100) / 10
-        self.memory[self.index+2] = self.gpio[(self.opcode & 0x0f00) >> 8] % 10
+        self.memory[self.index] = int(self.gpio[(self.opcode & 0x0f00) >> 8] / 100)
+        self.memory[self.index+1] = int((self.gpio[(self.opcode & 0x0f00) >> 8] % 100) / 10)
+        self.memory[self.index+2] = int(self.gpio[(self.opcode & 0x0f00) >> 8] % 10)
         print()
 
     def _Fx55(self):
@@ -527,4 +527,4 @@ class Emulator:
 
 
 
-emulator = Emulator(size=8, rom_path="INVADERS")
+emulator = Emulator(size=8, rom_path="MAZE")
